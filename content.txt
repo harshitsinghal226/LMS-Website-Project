@@ -1,7 +1,25 @@
 npm install react-router-dom for routing
+
 react-youtube for playing youtube video
+
 uniqid for creating unique hexa decimal id for our courses
+
 quill this package for generating text for course description
+
 humanize-duration for converting video duration in hours minutes and seconds
+
 rc-progress for designing progress bar or circular progress
+
 react-simple-star-rating for helping displaying star rating in our courses
+
+dotenv package helps in using environment in our project
+
+cors:- using cors wwe can connect our backendwith any other domain
+
+cloudinary:- bcz we are going to store our image on cloudinary
+
+multer: using multer package we can upload the images
+
+svix: To manage the webhooks 
+
+@clerk/express: so that we can use clerk in our backend project

@@ -14,7 +14,7 @@ const CallToAction = () => {
         nostrum?
       </p>
       <div className="flex items-centerfont-medium gap-6 mt-4">
-        <button className="px-10 py-3 rounded-md text-white bg-blue-600">
+        <button className="px-10 py-3 rounded-md text-white bg-emerald-600">
           Get started
         </button>
         <button className="flex items-center gap-2">

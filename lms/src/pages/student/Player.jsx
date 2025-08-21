@@ -35,15 +35,15 @@ const Player = () => {
     <>
       <div className="p-4 sm:p-10 flex flex-col-reverse md:grid md:grid-cols-2 gap-10 md:px-36">
         {/* left column */}
-        <div className="text-gray-800">
-          <h2 className="text-xl font-semibold">Course Structure</h2>
+        <div className="text-slate-800">
+          <h2 className="text-xl font-semibold text-slate-900">Course Structure</h2>
 
           <div className="pt-5">
             {courseData &&
               courseData.courseContent.map((chapter, index) => (
                 <div
                   key={index}
-                  className="border border-gray-300 bg-white mb-2 rounded"
+                  className="border border-slate-200 bg-white mb-2 rounded"
                 >
                   <div
                     className="flex items-center justify-between px-4 py-3 cursor-pointer select-none"
@@ -61,7 +61,7 @@ const Player = () => {
                         {chapter.chapterTitle}
                       </p>
                     </div>
-                    <p className="text-sm md:text-default">
+                    <p className="text-sm md:text-default text-slate-500">
                       {chapter.chapterContent.length} lectures -{" "}
                       {calculateChapterTime(chapter)}
                     </p>
@@ -72,7 +72,7 @@ const Player = () => {
                       openSections[index] ? "max-h-96" : "max-h-0"
                     }`}
                   >
-                    <ul className="list-disc md:pl-10 pl-4 pr-4 py-2 text-gray-600 border-t border-gray-300">
+                    <ul className="list-disc md:pl-10 pl-4 pr-4 py-2 text-slate-600 border-t border-slate-200">
                       {chapter.chapterContent.map((lecture, i) => (
                         <li key={i} className="flex items-start gap-2 py-1">
                           <img
@@ -82,7 +82,7 @@ const Player = () => {
                             alt="play icon"
                             className="w-4 h-4 mt-1"
                           />
-                          <div className="flex items-center justify-between w-full text-gray-800 text-xs md:text-default">
+                          <div className="flex items-center justify-between w-full text-slate-800 text-xs md:text-default">
                             <p>{lecture.lectureTitle}</p>
                             <div className="flex gap-2">
                               {lecture.lectureUrl && (
@@ -94,7 +94,7 @@ const Player = () => {
                                       lecture: i + 1,
                                     })
                                   }
-                                  className="text-blue-500 cursor-pointer"
+                                  className="text-emerald-600 cursor-pointer"
                                 >
                                   Watch
                                 </p>

@@ -107,7 +107,7 @@ const AddCourse = () => {
 
   return (
     <div className="h-screen overflow-scroll flex flex-col items-start justify-between md:p-8 md:pb-0 p-4 pt-8 pb-0">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-md w-full text-gray-500">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-md w-full text-slate-600">
         <div className="flex flex-col gap-1">
           <p>Course Title</p>
           <input
@@ -115,7 +115,7 @@ const AddCourse = () => {
             value={courseTitle}
             type="text"
             placeholder="Type here"
-            className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500"
+            className="outline-none md:py-2.5 py-2 px-3 rounded border border-slate-300"
             required
           />
         </div>
@@ -132,7 +132,7 @@ const AddCourse = () => {
               value={coursePrice}
               type="number"
               placeholder="0"
-              className="outline-none md:py-2.5 py-2 w-28 px-3 rounded border border-gray-500"
+              className="outline-none md:py-2.5 py-2 w-28 px-3 rounded border border-slate-300"
               required
             />
           </div>
@@ -143,7 +143,7 @@ const AddCourse = () => {
               <img
                 src={assets.file_upload_icon}
                 alt=""
-                className="p-3 bg-blue-500 rounded"
+                className="p-3 bg-emerald-500 rounded"
               />
               <input
                 type="file"
@@ -170,7 +170,7 @@ const AddCourse = () => {
             placeholder="0"
             min={0}
             max={100}
-            className="outline-none md:py-2.5 py-2 w-28 px-3 rounded border border-gray-500"
+            className="outline-none md:py-2.5 py-2 w-28 px-3 rounded border border-slate-300"
             required
           />
         </div>
@@ -178,8 +178,8 @@ const AddCourse = () => {
         {/* Adding Chapters & Lectures */}
         <div>
           {chapters.map((chapters, chapterIndex) => (
-            <div key={chapterIndex} className="bg-white border rounded-lg mb-4">
-              <div className="flex justify-between items-center p-4 border-b">
+            <div key={chapterIndex} className="bg-white border border-slate-200 rounded-lg mb-4">
+              <div className="flex justify-between items-center p-4 border-b border-slate-200">
                 <div className="flex items-center">
                   <img
                     onClick={() => handleChapter("toggle", chapter.chapterId)}
@@ -194,7 +194,7 @@ const AddCourse = () => {
                     {chapterIndex + 1} {chapter.chapterTitle}{" "}
                   </span>
                 </div>
-                <span className="text-gray-500">
+                <span className="text-slate-500">
                   {chapter.chapterContent.length} Lectures
                 </span>
                 <img
@@ -217,7 +217,7 @@ const AddCourse = () => {
                         <a
                           href={lecture.lectureUrl}
                           target="_blank"
-                          className="text-blue-500"
+                          className="text-emerald-600"
                         >
                           Link
                         </a>{" "}
@@ -238,7 +238,7 @@ const AddCourse = () => {
                     </div>
                   ))}
                   <div
-                    className="inline-flex bg-gray-100 p-2 rounded cursor-pointer mt-2"
+                    className="inline-flex bg-slate-100 p-2 rounded cursor-pointer mt-2"
                     onClick={() => handleLecture("add", chapter.chapterId)}
                   >
                     + Add Lecture
@@ -248,22 +248,22 @@ const AddCourse = () => {
             </div>
           ))}
           <div
-            className="flex justify-center items-center bg-blue-100 p-2 rounded-lg cursor-pointer"
+            className="flex justify-center items-center bg-emerald-100 p-2 rounded-lg cursor-pointer"
             onClick={() => handleChapter("add")}
           >
             + Add Chapter
           </div>
 
           {showPopup && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-              <div className="bg-white text-gray-700 p-4 rounded relative w-full max-w-80">
+            <div className="fixed inset-0 flex items-center justify-center bg-slate-900/60">
+              <div className="bg-white text-slate-700 p-4 rounded relative w-full max-w-80 shadow-xl">
                 <h2 className="text-lg font-semibold mb-4">Add Lecture</h2>
 
                 <div className="mb-2">
                   <p>Lecture Title</p>
                   <input
                     type="text"
-                    className="mt-1 block w-full border rounded py-1 px-2"
+                    className="mt-1 block w-full border border-slate-300 rounded py-1 px-2"
                     value={lectureDetails.lectureTitle}
                     onChange={(e) =>
                       setLectureDetails({
@@ -278,7 +278,7 @@ const AddCourse = () => {
                   <p>Duration (minutes)</p>
                   <input
                     type="number"
-                    className="mt-1 block w-full border rounded py-1 px-2"
+                    className="mt-1 block w-full border border-slate-300 rounded py-1 px-2"
                     value={lectureDetails.lectureDuration}
                     onChange={(e) =>
                       setLectureDetails({
@@ -293,7 +293,7 @@ const AddCourse = () => {
                   <p>Lecture URL</p>
                   <input
                     type="text"
-                    className="mt-1 block w-full border rounded py-1 px-2"
+                    className="mt-1 block w-full border border-slate-300 rounded py-1 px-2"
                     value={lectureDetails.lectureUrl}
                     onChange={(e) =>
                       setLectureDetails({
@@ -321,7 +321,7 @@ const AddCourse = () => {
 
                 <button
                   type="button"
-                  className="w-full bg-blue-400 text-white px-4 py-2 rounded"
+                  className="w-full bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-500 transition"
                   onClick={addLecture}
                 >
                   Add
@@ -339,7 +339,7 @@ const AddCourse = () => {
         </div>
         <button
           type="submit"
-          className="bg-black text-white w-max py-2.5 px-8 rounded my-4"
+          className="bg-emerald-600 text-white w-max py-2.5 px-8 rounded my-4 hover:bg-emerald-500 transition"
         >
           ADD
         </button>

@@ -19,7 +19,7 @@ function App() {
   const isEudcator = useMatch("/educator/*");
 
   return (
-    <div className="text-default min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white text-slate-800 antialiased">
       {!isEudcator && <Navbar />}      
       <Routes>
         <Route path="/" element={<Home />} />

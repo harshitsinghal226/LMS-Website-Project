@@ -19,40 +19,40 @@ const Dashboard = () => {
     <div className="min-h-screen flex flex-col items-start justify-between gap-8 md:p-8 md:pb-0 p-4 pt-8 pb-0">
       <div className="space-y-5">
         <div className="flex flex-wrap gap-5 items-center">
-          <div class="flex items-center gap-3 shadow-card border border-blue-500 p-4 w-57 rounded-md">
+          <div class="flex items-center gap-3 shadow-card border border-emerald-500/40 p-4 w-57 rounded-md bg-white">
             <img src={assets.patients_icon} alt="patients_icon" />
             <div>
-              <p class="text-2xl font-medium text-gray-600">
+              <p class="text-2xl font-medium text-slate-700">
                 {dashboardData.enrolledStudentsData.length}
               </p>
-              <p class="text-base text-gray-500">Total Enrolments</p>
+              <p class="text-base text-slate-500">Total Enrolments</p>
             </div>
           </div>
-          <div class="flex items-center gap-3 shadow-card border border-blue-500 p-4 w-56 rounded-md">
+          <div class="flex items-center gap-3 shadow-card border border-emerald-500/40 p-4 w-56 rounded-md bg-white">
             <img src={assets.appointments_icon} alt="patients_icon" />
             <div>
-              <p class="text-2xl font-medium text-gray-600">
+              <p class="text-2xl font-medium text-slate-700">
                 {dashboardData.totalCourses}
               </p>
-              <p class="text-base text-gray-500">Total Courses</p>
+              <p class="text-base text-slate-500">Total Courses</p>
             </div>
           </div>
-          <div class="flex items-center gap-3 shadow-card border border-blue-500 p-4 w-56 rounded-md">
+          <div class="flex items-center gap-3 shadow-card border border-emerald-500/40 p-4 w-56 rounded-md bg-white">
             <img src={assets.earning_icon} alt="patients_icon" />
             <div>
-              <p class="text-2xl font-medium text-gray-600">
+              <p class="text-2xl font-medium text-slate-700">
                 {currency}
                 {dashboardData.totalEarnings}
               </p>
-              <p class="text-base text-gray-500">Total Earnings</p>
+              <p class="text-base text-slate-500">Total Earnings</p>
             </div>
           </div>
         </div>
         <div>
           <h2 className="pb-4 text-lg font-medium">Latest Enrollments</h2>
-          <div className="flex flex-col items-center max-w-4xl w-full overflow-hidden rounded-md bg-white border border-gray-500/20">
+          <div className="flex flex-col items-center max-w-4xl w-full overflow-hidden rounded-md bg-white border border-slate-200">
             <table class="table-fixed md:table-auto w-full overflow-hidden">
-              <thead class="text-gray-900 border-b border-gray-500/20 text-sm text-left">
+              <thead class="text-slate-900 border-b border-slate-200 text-sm text-left">
                 <tr>
                   <th class="px-4 py-3 font-semibold text-center hidden sm:table-cell">
                     #
@@ -61,9 +61,9 @@ const Dashboard = () => {
                   <th class="px-4 py-3 font-semibold">Course Title</th>
                 </tr>
               </thead>
-              <tbody class="text-sm text-gray-500">
+              <tbody class="text-sm text-slate-600">
                 {dashboardData.enrolledStudentsData.map((item, index) => (
-                  <tr key={index} class="border-b border-gray-500/20">
+                  <tr key={index} class="border-b border-slate-200">
                     <td class="px-4 py-3 text-center hidden sm:table-cell">
                       {index + 1}
                     </td>

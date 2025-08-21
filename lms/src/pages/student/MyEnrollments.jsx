@@ -27,9 +27,9 @@ const MyEnrollments = () => {
   return (
     <>
       <div className="md:px-36 px-8 pt-10">
-        <h1 className="text-2xl font-semibold">My Enrollments</h1>
-        <table className="md:table-auto table-fixed w-full overflow-hidden border mt-10">
-          <thead className="text-gray-900 border border-gray-500/20 text-sm text-left max-sm:hidden">
+        <h1 className="text-2xl font-bold text-slate-900">My Enrollments</h1>
+        <table className="md:table-auto table-fixed w-full overflow-hidden border mt-10 rounded-md">
+          <thead className="text-slate-900 border border-slate-200 text-sm text-left max-sm:hidden">
             <tr>
               <th className="px-4 py-3 font-semibold truncate">Course</th>
               <th className="px-4 py-3 font-semibold truncate">Duration</th>
@@ -37,9 +37,9 @@ const MyEnrollments = () => {
               <th className="px-4 py-3 font-semibold truncate">Status</th>
             </tr>
           </thead>
-          <tbody className="text-gray-700">
+          <tbody className="text-slate-700">
             {enrolledCourses.map((course, index) => (
-              <tr key={index} className="border border-gray-500/20">
+              <tr key={index} className="border border-slate-200">
                 <td className="md:px-4 pl-2 md:pl-4 py-3 flex items-center space-x-3">
                   <img
                     src={course.courseThumbnail}
@@ -48,7 +48,7 @@ const MyEnrollments = () => {
                   />
                   <div className="flex-1">
                     <p className="mb-1 max-sm:text-sm">{course.courseTitle}</p>
-                    <Line strokeWidth={2} percent={progressArray[index] ? (progressArray[index].lectureCompleted*100) / progressArray[index].totalLectures : 0} className="bg-gray-300 rounded-full" />
+                    <Line strokeWidth={2} percent={progressArray[index] ? (progressArray[index].lectureCompleted*100) / progressArray[index].totalLectures : 0} className="bg-slate-200 rounded-full" />
                   </div>
                 </td>
                 <td className="px-4 py-3 max-sm:hidden">
@@ -56,12 +56,12 @@ const MyEnrollments = () => {
                 </td>
                 <td className="px-4 py-3 max-sm:hidden">
                   {progressArray[index] &&
-                    `${progressArray[index].lectureCompleted} / ${progressArray[index].totalLectures}`}{" "}
+                    `${progressArray[index].lectureCompleted} / ${progressArray[index].totalLectures}`} {" "}
                   <span>Lectures</span>
                 </td>
                 <td className="px-4 py-3 max-sm:text-right">
                   <button
-                    className="px-3 sm:px-5 py-1.5 sm:py-2 bg-blue-600 max-sm:text-xs text-white cursor-pointer"
+                    className="px-3 sm:px-5 py-1.5 sm:py-2 bg-emerald-600 max-sm:text-xs text-white cursor-pointer rounded"
                     onClick={() => navigate("/player/" + course._id)}
                   >
                     {progressArray[index] &&

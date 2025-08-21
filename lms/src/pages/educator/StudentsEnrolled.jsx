@@ -15,9 +15,9 @@ const StudentsEnrolled = () => {
 
   return enrolledStudents ? (
     <div className="min-h-screen flex flex-col items-start justify-between md:p-8 md:pb-0 p-4 pt-8 pb-0">
-      <div className="flex flex-col items-center max-w-4xl w-full overflow-hidden rounded-md bg-white border border-gray-500/20">
+      <div className="flex flex-col items-center max-w-4xl w-full overflow-hidden rounded-md bg-white border border-slate-200">
         <table className="table-fixed md:table-auto w-full overflow-hidden pb-4">
-          <thead className="text-gray-900 border-b border-gray-500/20 text-sm text-left">
+          <thead className="text-slate-900 border-b border-slate-200 text-sm text-left">
             <tr>
               <th className="px-4 py-3 font-semibold text-center hidden sm:table-cell">
                 #
@@ -29,9 +29,9 @@ const StudentsEnrolled = () => {
               </th>
             </tr>
           </thead>
-          <tbody className="text-sm text-gray-500">
+          <tbody className="text-sm text-slate-600">
             {enrolledStudents.map((item, index) => (
-              <tr key={index} className="border-b border-gray-500/20">
+              <tr key={index} className="border-b border-slate-200">
                 <td className="px-4 py-3 text-center hidden sm:table-cell">
                   {index + 1}
                 </td>

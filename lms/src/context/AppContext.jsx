@@ -2,12 +2,16 @@ import { createContext, useEffect, useState } from "react";
 import { dummyCourses } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 import humanizeDuration from "humanize-duration";
+import { useAuth, useUser } from "@clerk/clerk-react";
 
 export const AppContext = createContext();
 
 export const AppContextProvider = (props) => {
   const currency = import.meta.env.VITE_CURRENCY;
   const navigate = useNavigate();
+
+  const { getToken } = useAuth();
+  const { user } = useUser();
 
   const [allCourses, setAllCourses] = useState([]);
   const [isEducator, setIsEducator] = useState(true);
@@ -49,26 +53,35 @@ export const AppContextProvider = (props) => {
   // Function to Calculate no. of Lectures in the course
   const calculateNoOfLectures = (course) => {
     let totalLectures = 0;
-    course.courseContent.forEach(chapter => {
-      if(Array.isArray(chapter.chapterContent)) {
+    course.courseContent.forEach((chapter) => {
+      if (Array.isArray(chapter.chapterContent)) {
         totalLectures += chapter.chapterContent.length;
       }
     });
     return totalLectures;
-  }
+  };
 
   //Fetch user enrolled courses
-  const fetchUserEnrolledCourses = async() => {
-    setEnrolledCourses(dummyCourses)
-  }
-
+  const fetchUserEnrolledCourses = async () => {
+    setEnrolledCourses(dummyCourses);
+  };
 
   useEffect(() => {
     fetchAllCourses();
     fetchUserEnrolledCourses();
   }, []);
 
-  //we pass fetchUserEnrolledCourses in this so that we can 
+  const logToken = async () => {
+    console.log(await getToken());
+  }
+ 
+  useEffect(()=> {
+    if(user) {
+      logToken()
+    }
+  },[user])
+
+  //we pass fetchUserEnrolledCourses in this so that we can
   // access it in any other components
   const value = {
     currency,

@@ -13,6 +13,7 @@ import MyCourses from "./pages/educator/MyCourses";
 import StudentsEnrolled from "./pages/educator/StudentsEnrolled";
 import Navbar from "./components/student/Navbar";
 import "quill/dist/quill.snow.css";
+import { ToastContainer} from 'react-toastify';
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white text-slate-800 antialiased">
+      <ToastContainer />
       {!isEudcator && <Navbar />}      
       <Routes>
         <Route path="/" element={<Home />} />

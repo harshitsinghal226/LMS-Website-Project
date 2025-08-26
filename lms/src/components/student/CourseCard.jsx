@@ -31,7 +31,7 @@ const CourseCard = ({ course }) => {
           {course.courseTitle}
         </h3>
         <p className="text-slate-600 mb-3 flex items-center gap-2">
-          <span className="font-medium">{course.educator.name}</span>
+          <span className="font-medium">{course.educator?.name || "Unknown Educator"}</span>
         </p>
         <div className="flex items-center mb-3">
           <p>{calculateRating(course)}</p>

@@ -2,11 +2,17 @@ import { clerkClient } from "@clerk/express";
 import Course from "../models/Course.js";
 import { v2 as cloudinary } from "cloudinary";
 import { Purchase } from "../models/Purchase.js";
+import User from "../models/User.js";
 
 // update role to educator
 export const updateRoleToEducator = async (req, res) => {
   try {
-    const userId = req.auth.userId;
+    const { userId } = req.auth();
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Not authenticated" });
+    }
 
     await clerkClient.users.updateUserMetadata(userId, {
       publicMetadata: {
@@ -25,7 +31,7 @@ export const addCourse = async (req, res) => {
   try {
     const { courseData } = req.body;
     const imageFile = req.file;
-    const educatorId = req.auth.userId;
+    const { userId: educatorId } = req.auth();
 
     if (!imageFile) {
       return res.json({ success: false, message: "Thumbnail not Attached" });
@@ -47,7 +53,7 @@ export const addCourse = async (req, res) => {
 // Get Educator Courses
 export const getEducatorCourses = async (req, res) => {
   try {
-    const educator = req.auth.userId;
+    const { userId: educator } = req.auth();
     const courses = await Course.find({ educator });
 
     res.json({ success: true, courses });
@@ -60,7 +66,7 @@ export const getEducatorCourses = async (req, res) => {
 
 export const educatorDashboardData = async (req, res) => {
   try {
-    const educator = req.auth.userId;
+    const { userId: educator } = req.auth();
     const courses = await Course.find({ educator });
     const totalCourses = courses.length;
 
@@ -112,7 +118,7 @@ export const educatorDashboardData = async (req, res) => {
 
 export const getEnrolledStudentsData = async (req, res) => {
   try {
-    const educator = req.auth.userId;
+    const { userId: educator } = req.auth();
     const courses = await Course.find({ educator });
     const courseIds = courses.map((course) => course._id);
 

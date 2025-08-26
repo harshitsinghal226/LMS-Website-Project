@@ -13,10 +13,10 @@ import userRouter from "./routes/userRoute.js";
 const app = express();
 
 // Connect to Database
-connectDB();
-connectCloudinary();
-// await connectDB();
-// await connectCloudinary();
+// connectDB();
+// connectCloudinary();
+await connectDB();
+await connectCloudinary();
 
 //Middlewares
 app.use(cors());

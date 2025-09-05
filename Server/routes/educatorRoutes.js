@@ -5,6 +5,9 @@ import { protectEducator } from "../middlewares/authMiddleware.js";
 
 const educatorRouter = express.Router();
 
+// Add JSON parsing middleware for routes that need it
+educatorRouter.use(express.json());
+
 //Add Educator Role
 educatorRouter.get("/update-role", updateRoleToEducator);
 educatorRouter.post('/add-course', upload.single("image"), protectEducator, addCourse);

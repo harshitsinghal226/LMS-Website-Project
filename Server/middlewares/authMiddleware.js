@@ -1,4 +1,5 @@
 import { clerkClient } from "@clerk/express";
+import User from "../models/User.js";
 
 //Middleware ( Protect Educator Routes )
 // In this we will get the request and response and after
@@ -13,13 +14,20 @@ export const protectEducator = async (req, res, next) => {
         .json({ success: false, message: "Not authenticated" });
     }
 
-    const user = await clerkClient.users.getUser(userId);
+    // Check if user exists in our database and has educator role
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
 
-    // ✅ If the role is not educator, block access
-    if (user.publicMetadata.role !== "educator") {
+    // ✅ If the user doesn't have educator role, block access
+    if (!user.roles.includes("educator")) {
       return res
         .status(403)
-        .json({ success: false, message: "Unauthorized Access" });
+        .json({ success: false, message: "Unauthorized Access - Educator role required" });
     }
 
     next(); // ✅ allow access if educator

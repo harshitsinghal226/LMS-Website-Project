@@ -1,25 +1,16 @@
-import React, { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { memo } from "react";
 
-const Loading = () => {
-
-  const {path} = useParams()
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if(path) {
-      const timer = setTimeout(()=> {
-        navigate(`/${path}`)
-      }, 5000)
-      return ()=> clearTimeout(timer);
-    }
-  },[])
-
+const Loading = memo(() => {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-16 sm:w-20 aspect-square border-4 border-gray-300 border-t-4 border-t-blue-400 rounded-full animate-spin"></div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-green-50">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+        <p className="text-emerald-600 font-medium">Loading...</p>
+      </div>
     </div>
   );
-};
+});
+
+Loading.displayName = 'Loading';
 
 export default Loading;

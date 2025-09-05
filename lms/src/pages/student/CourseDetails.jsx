@@ -19,7 +19,6 @@ const CourseDetails = () => {
   const [playerData, setPlayerData] = useState(null);
 
   const {
-    allCourses,
     calculateRating,
     calculateChapterTime,
     calculateCourseDuration,
@@ -35,7 +34,7 @@ const CourseDetails = () => {
       const { data } = await axios.get(backendUrl + "/api/course/" + id);
 
       if (data.success) {
-        setCourseData(data.course);
+        setCourseData(data.courseData);
       } else {
         toast.error(data.message);
       }
@@ -81,6 +80,20 @@ const CourseDetails = () => {
     }
   }, [userData, courseData]);
 
+  // Refresh enrollment status when component becomes visible (e.g., after payment)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && userData && courseData) {
+        setIsAlreadyEnrolled(
+          userData.enrolledCourses?.includes(courseData._id) || false
+        );
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [userData, courseData]);
+
 
   // function for chapter list toggle
   const toggleSection = (index) => {
@@ -88,16 +101,17 @@ const CourseDetails = () => {
     setOpenSections((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
-  return courseData ? (
+  return (
     <>
-      <div className="flex md:flex-row flex-col-reverse gap-10 relative isolate items-start justify-between md:px-36 px-8 md:pt-30 pt-20 text-left">
-        <div className="absolute top-0 left-0 w-full h-[500px] -z-1 bg-gradient-to-b from-emerald-50/80 to-transparent"></div>
+      {courseData ? (
+        <div className="flex md:flex-row flex-col-reverse gap-10 relative isolate items-start justify-between md:px-36 px-8 md:pt-30 pt-20 text-left">
+          <div className="absolute top-0 left-0 w-full h-[500px] -z-1 bg-gradient-to-b from-emerald-50/80 to-transparent"></div>
 
-        {/* left column */}
-        <div className="max-w-xl z-10 text-slate-600">
-          <h1 className="md:text-[36px] text-[26px] font-extrabold text-slate-900">
-            {courseData.courseTitle}
-          </h1>
+          {/* left column */}
+          <div className="max-w-xl z-10 text-slate-600">
+            <h1 className="md:text-[36px] text-[26px] font-extrabold text-slate-900">
+              {courseData.courseTitle}
+            </h1>
           <p
             className="pt-4 md:text-base text-sm"
             dangerouslySetInnerHTML={{
@@ -298,7 +312,7 @@ const CourseDetails = () => {
               </div>
             </div>
 
-            <button onClick={enrolledCourse} className="md:mt-6 mt-4 w-full py-3 rounded bg-blue-600 text-white font-medium">
+            <button onClick={enrolledCourse} className="md:mt-6 mt-4 w-full py-3 rounded bg-blue-600 text-white font-medium cursor-pointer">
               {isAlreadyEnrolled ? "Already Enrolled" : "Enroll Now"}
             </button>
 
@@ -316,11 +330,12 @@ const CourseDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      ) : (
+        <Loading />
+      )}
       <Footer />
     </>
-  ) : (
-    <Loading />
   );
 };
 

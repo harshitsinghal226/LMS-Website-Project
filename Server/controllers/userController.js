@@ -4,15 +4,36 @@ import Stripe from "stripe";
 import Course from "../models/Course.js";
 import { CourseProgress } from "../models/CourseProgress.js";
 
-// Get User Data
+//Get User Data
 export const getUserData = async (req, res) => {
   try {
     const { userId } = req.auth();
     const user = await User.findById(userId);
-
     if (!user) {
       return res.json({ success: false, message: "User not found" });
     }
+    res.json({ success: true, user });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const createUser = async (req, res) => {
+  try {
+    const { _id, email, name, imageUrl, roles } = req.body;
+    const existingUser = await User.findById(_id);
+    
+    if (existingUser) {
+      return res.json({ success: false, message: "User already exists" });
+    }
+
+    const user = await User.create({
+      _id,
+      email,
+      name,
+      imageUrl,
+      roles: Array.isArray(roles) ? roles : [roles]
+    });
 
     res.json({ success: true, user });
   } catch (error) {
@@ -20,13 +41,28 @@ export const getUserData = async (req, res) => {
   }
 };
 
-// User Enrolled Courses With Lecture Links
-export const userEnrolledCourses = async (req, res) => {
+export const updateUserRoles = async (req, res) => {
   try {
     const { userId } = req.auth();
-    const userData = await User.findById(userId).populate("enrolledCourses");
+    const { action, role } = req.body;
 
-    res.json({ success: true, enrolledCourses: userData.enrolledCourses });
+    if (!action || !role) {
+      return res.json({ success: false, message: "Action and role are required" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.json({ success: false, message: "User not found" });
+    }
+
+    if (action === 'add' && !user.roles.includes(role)) {
+      user.roles.push(role);
+    } else if (action === 'remove' && user.roles.includes(role)) {
+      user.roles = user.roles.filter(r => r !== role);
+    }
+
+    await user.save();
+    res.json({ success: true, user });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
@@ -49,7 +85,7 @@ export const purchaseCourse = async (req, res) => {
       courseId: courseData._id,
       userId,
       amount: (
-        courseData.price -
+        courseData.coursePrice -
         (courseData.discount * courseData.coursePrice) / 100
       ).toFixed(2),
     };
@@ -85,6 +121,20 @@ export const purchaseCourse = async (req, res) => {
     });
 
     res.json({ success: true, session_url: session.url });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// User Enrolled Courses With Lecture Links
+export const userEnrolledCourses = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const user = await User.findById(userId).populate("enrolledCourses");
+    if (!user) {
+      return res.json({ success: false, message: "User not found" });
+    }
+    res.json({ success: true, enrolledCourses: user.enrolledCourses });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }

@@ -9,35 +9,28 @@ import connectCloudinary from "./configs/cloudinary.js";
 import courseRouter from "./routes/courseRoute.js";
 import userRouter from "./routes/userRoute.js";
 
-//Initialize Express
 const app = express();
 
-// Connect to Database
+// Connect to Database and Cloudinary
 connectDB();
 connectCloudinary();
-// await connectDB();
-// await connectCloudinary();
 
-//Middlewares
+// Middlewares
 app.use(cors());
 app.use(clerkMiddleware());
 
-//Routes
+// Routes
 app.get("/", (req, res) => res.send("API Working"));
-// app.post('/clerk', express.json(), clerkWebhooks)
-app.post(
-  "/clerk",
-  express.raw({ type: "application/json" }), // raw body for Clerk
-  clerkWebhooks
-);
 
-app.use("/api/educator", express.json(), educatorRouter);
-app.use("/api/course", express.json(), courseRouter);
-app.use("/api/user", express.json(), userRouter);
+// Webhook routes with proper body parsing
+app.post("/clerk", express.raw({ type: "application/json" }), clerkWebhooks);
 app.post('/stripe', express.raw({ type: 'application/json' }), stripeWebhooks);
 
-// Port
-// we will get port number from environment
+// API routes - educator routes now use JSON only (no file uploads)
+app.use("/api/educator", educatorRouter);
+app.use("/api/course", express.json(), courseRouter);
+app.use("/api/user", express.json(), userRouter);
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

@@ -87,31 +87,36 @@ export const stripeWebhooks = async (request, response) => {
 
   // Handle the event
   switch (event.type) {
-    case "payment_intent.succeeded": {
-      const paymentIntent = event.data.object;
-      const paymentIntentId = paymentIntent.id;
-
-      const session = await stripeInstance.checkout.sessions.list({
-        payment_intent: paymentIntentId,
-      });
-
-      const { purchaseId } = session.data[0].metadata;
+    case "checkout.session.completed": {
+      const session = event.data.object;
+      const purchaseId = session?.metadata?.purchaseId;
+      if (!purchaseId) break;
 
       const purchaseData = await Purchase.findById(purchaseId);
+      if (!purchaseData || purchaseData.status === 'completed') break;
+
       const userData = await User.findById(purchaseData.userId);
-      const courseData = await Course.findById(
-        purchaseData.courseId.toString()
+      const courseData = await Course.findById(purchaseData.courseId.toString());
+      if (!userData || !courseData) break;
+
+      await Course.updateOne(
+        { _id: courseData._id },
+        { $addToSet: { enrolledStudents: userData._id } }
       );
 
-      courseData.enrolledStudents.push(userData);
-      await courseData.save();
+      await User.updateOne(
+        { _id: userData._id },
+        { $addToSet: { enrolledCourses: courseData._id } }
+      );
 
-      userData.enrolledCourses.push(courseData._id);
-      await userData.save();
-
-      purchaseData.status = "completed";
+      // persist paymentIntentId for idempotency and to avoid null duplicates
+      if (session.payment_intent) {
+        purchaseData.paymentIntentId = typeof session.payment_intent === 'string'
+          ? session.payment_intent
+          : session.payment_intent.id;
+      }
+      purchaseData.status = 'completed';
       await purchaseData.save();
-
       break;
     }
     case "payment_intent.payment_failed": {
@@ -124,6 +129,8 @@ export const stripeWebhooks = async (request, response) => {
 
       const { purchaseId } = session.data[0].metadata;
       const purchaseData = await Purchase.findById(purchaseId);
+      // persist paymentIntentId on failure too
+      purchaseData.paymentIntentId = paymentIntentId;
       purchaseData.status = "failed";
       await purchaseData.save();
       break;

@@ -11,6 +11,12 @@ const purchaseSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  paymentIntentId: {
+    type: String,
+    index: true,
+    unique: true,
+    sparse: true,
+  },
   amount: {
     type: Number,
     required: true,

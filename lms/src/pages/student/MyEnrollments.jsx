@@ -59,8 +59,8 @@ const MyEnrollments = () => {
   }, [enrolledCourses]);
 
   return (
-    <>
-      <div className="md:px-36 px-8 pt-10">
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1 md:px-36 px-8 pt-10">
         <h1 className="text-2xl font-bold text-slate-900">My Enrollments</h1>
         <table className="md:table-auto table-fixed w-full overflow-hidden border mt-10 rounded-md">
           <thead className="text-slate-900 border border-slate-200 text-sm text-left max-sm:hidden">
@@ -122,7 +122,7 @@ const MyEnrollments = () => {
       </div>
 
       <Footer />
-    </>
+    </div>
   );
 };
 

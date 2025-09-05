@@ -104,7 +104,7 @@ export const educatorDashboardData = async (req, res) => {
     res.json({
       success: true,
       dashboardData: {
-        totalEarning,
+        totalEarnings: totalEarning,
         enrolledStudentsData,
         totalCourses,
       },

@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import connectDB from "./configs/mongodb.js";
-import { clerkWebhooks, stripeWebhooks } from "./controllers/webhooks.js";
+import { clerkWebhooks } from "./controllers/webhooks.js";
 import educatorRouter from "./routes/educatorRoutes.js";
 import { clerkMiddleware } from "@clerk/express";
 import connectCloudinary from "./configs/cloudinary.js";
@@ -24,7 +24,6 @@ app.get("/", (req, res) => res.send("API Working"));
 
 // Webhook routes with proper body parsing
 app.post("/clerk", express.raw({ type: "application/json" }), clerkWebhooks);
-app.post('/stripe', express.raw({ type: 'application/json' }), stripeWebhooks);
 
 // API routes - educator routes now use JSON only (no file uploads)
 app.use("/api/educator", educatorRouter);

@@ -9,6 +9,7 @@ import {
   updateUserCourseProgress,
   getUserCourseProgress,
   addUserRating,
+  verifyPayment,
 } from "../controllers/userController.js";
 
 const userRouter = express.Router();
@@ -19,9 +20,10 @@ userRouter.post("/create", createUser);
 userRouter.get("/data", getUserData);
 userRouter.post("/update-roles", updateUserRoles);
 userRouter.post("/purchase", purchaseCourse);
+userRouter.post("/verify-payment", verifyPayment);
 userRouter.get("/enrolled-courses", userEnrolledCourses);
 userRouter.post("/update-course-progress", updateUserCourseProgress);
-userRouter.get("/get-course-progress", getUserCourseProgress);
+userRouter.post("/get-course-progress", getUserCourseProgress);
 userRouter.post("/add-rating", addUserRating);
 
 export default userRouter;

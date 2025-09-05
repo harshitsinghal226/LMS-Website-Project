@@ -11,12 +11,6 @@ const purchaseSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-  paymentIntentId: {
-    type: String,
-    index: true,
-    unique: true,
-    sparse: true,
-  },
   amount: {
     type: Number,
     required: true,
@@ -25,6 +19,12 @@ const purchaseSchema = new mongoose.Schema({
     type: String,
     enum: ["pending", "completed", "failed"],
     default: "pending",
+  },
+  paymentIntentId: {
+    type: String,
+    index: true,
+    unique: true,
+    sparse: true,
   }
 }, { timestamps: true });
 

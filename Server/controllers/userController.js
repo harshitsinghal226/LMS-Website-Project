@@ -81,6 +81,26 @@ export const purchaseCourse = async (req, res) => {
       return res.json({ success: false, message: "Data not Found" });
     }
 
+    // Check if user is already enrolled in this course
+    if (userData.enrolledCourses.includes(courseId)) {
+      return res.json({ success: false, message: "You are already enrolled in this course" });
+    }
+
+    // Check if there's already a pending or completed purchase for this user and course
+    const existingPurchase = await Purchase.findOne({
+      userId,
+      courseId: courseData._id,
+      status: { $in: ['pending', 'completed'] }
+    });
+
+    if (existingPurchase) {
+      if (existingPurchase.status === 'completed') {
+        return res.json({ success: false, message: "You are already enrolled in this course" });
+      } else {
+        return res.json({ success: false, message: "You already have a pending purchase for this course" });
+      }
+    }
+
     const purchaseData = {
       courseId: courseData._id,
       userId,
@@ -111,7 +131,7 @@ export const purchaseCourse = async (req, res) => {
     ];
 
     const session = await stripeInstance.checkout.sessions.create({
-      success_url: `${origin}/loading/my-enrollments`,
+      success_url: `${origin}/loading/my-enrollments?purchaseId=${newPurchase._id.toString()}`,
       cancel_url: `${origin}/`,
       line_items: line_items,
       mode: "payment",
@@ -224,6 +244,78 @@ export const addUserRating = async (req, res) => {
 
     await course.save();
     res.json({ success: true, message: "Rating added successfully" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Verify Payment and Complete Enrollment
+export const verifyPayment = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const { purchaseId } = req.body;
+
+    if (!purchaseId) {
+      return res.json({ success: false, message: "Purchase ID required" });
+    }
+
+    const purchase = await Purchase.findById(purchaseId);
+    if (!purchase) {
+      return res.json({ success: false, message: "Purchase not found" });
+    }
+
+    if (purchase.userId !== userId) {
+      return res.json({ success: false, message: "Unauthorized" });
+    }
+
+    if (purchase.status === 'completed') {
+      return res.json({ success: true, message: "Already enrolled" });
+    }
+
+    // Verify with Stripe
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    
+    // Find the checkout session for this purchase
+    const sessions = await stripe.checkout.sessions.list({ limit: 100 });
+    const session = sessions.data.find(s => s.metadata?.purchaseId === purchaseId);
+    
+    if (!session) {
+      return res.json({ success: false, message: "Payment session not found" });
+    }
+
+    if (session.payment_status !== 'paid') {
+      return res.json({ success: false, message: "Payment not completed" });
+    }
+
+    // Get user and course data
+    const user = await User.findById(purchase.userId);
+    const course = await Course.findById(purchase.courseId.toString());
+
+    if (!user || !course) {
+      return res.json({ success: false, message: "User or course not found" });
+    }
+
+    // Update enrollment
+    await Course.updateOne(
+      { _id: course._id },
+      { $addToSet: { enrolledStudents: user._id } }
+    );
+
+    await User.updateOne(
+      { _id: user._id },
+      { $addToSet: { enrolledCourses: course._id } }
+    );
+
+    // Update purchase status
+    purchase.status = 'completed';
+    if (session.payment_intent) {
+      purchase.paymentIntentId = typeof session.payment_intent === 'string' 
+        ? session.payment_intent 
+        : session.payment_intent.id;
+    }
+    await purchase.save();
+
+    res.json({ success: true, message: "Payment verified and enrollment completed" });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }

@@ -3,6 +3,8 @@ import { Purchase } from "../models/Purchase.js";
 import Stripe from "stripe";
 import Course from "../models/Course.js";
 import { CourseProgress } from "../models/CourseProgress.js";
+import EducatorRequest from "../models/EducatorRequest.js";
+import AdminEmail from "../models/AdminEmail.js";
 
 //Get User Data
 export const getUserData = async (req, res) => {
@@ -316,6 +318,283 @@ export const verifyPayment = async (req, res) => {
     await purchase.save();
 
     res.json({ success: true, message: "Payment verified and enrollment completed" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Request to become educator
+export const requestEducatorRole = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.json({ success: false, message: "User not found" });
+    }
+
+    // Check if user already has educator role
+    if (user.roles.includes('educator')) {
+      return res.json({ success: false, message: "User is already an educator" });
+    }
+
+    // Check if there's already a pending request
+    const existingRequest = await EducatorRequest.findOne({ 
+      userId, 
+      status: 'pending' 
+    });
+
+    if (existingRequest) {
+      return res.json({ success: false, message: "You already have a pending educator request" });
+    }
+
+    // Create new educator request
+    const educatorRequest = await EducatorRequest.create({
+      userId,
+      email: user.email,
+      name: user.name,
+      status: 'pending'
+    });
+
+    res.json({ success: true, message: "Educator request submitted successfully", request: educatorRequest });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Get all educator requests (Admin only)
+export const getEducatorRequests = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const user = await User.findById(userId);
+    
+    if (!user || !user.roles.includes('admin')) {
+      return res.json({ success: false, message: "Unauthorized access" });
+    }
+
+    // Check if user's email is allowed for admin access
+    const isEmailAllowed = await isEmailAllowedForAdmin(user.email);
+    if (!isEmailAllowed) {
+      return res.json({ success: false, message: "Your email is not authorized for admin access" });
+    }
+
+    const requests = await EducatorRequest.find()
+      .populate('userId', 'name email imageUrl')
+      .sort({ requestedAt: -1 });
+
+    res.json({ success: true, requests });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Approve educator request (Admin only)
+export const approveEducatorRequest = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const { requestId } = req.body;
+    
+    const admin = await User.findById(userId);
+    if (!admin || !admin.roles.includes('admin')) {
+      return res.json({ success: false, message: "Unauthorized access" });
+    }
+
+    // Check if admin's email is allowed for admin access
+    const isEmailAllowed = await isEmailAllowedForAdmin(admin.email);
+    if (!isEmailAllowed) {
+      return res.json({ success: false, message: "Your email is not authorized for admin access" });
+    }
+
+    const request = await EducatorRequest.findById(requestId);
+    if (!request) {
+      return res.json({ success: false, message: "Request not found" });
+    }
+
+    if (request.status !== 'pending') {
+      return res.json({ success: false, message: "Request has already been processed" });
+    }
+
+    // Update user roles to include educator
+    await User.findByIdAndUpdate(request.userId, {
+      $addToSet: { roles: 'educator' }
+    });
+
+    // Update request status
+    request.status = 'approved';
+    request.reviewedAt = new Date();
+    request.reviewedBy = userId;
+    await request.save();
+
+    res.json({ success: true, message: "Educator request approved successfully" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Reject educator request (Admin only)
+export const rejectEducatorRequest = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const { requestId, reason } = req.body;
+    
+    const admin = await User.findById(userId);
+    if (!admin || !admin.roles.includes('admin')) {
+      return res.json({ success: false, message: "Unauthorized access" });
+    }
+
+    // Check if admin's email is allowed for admin access
+    const isEmailAllowed = await isEmailAllowedForAdmin(admin.email);
+    if (!isEmailAllowed) {
+      return res.json({ success: false, message: "Your email is not authorized for admin access" });
+    }
+
+    const request = await EducatorRequest.findById(requestId);
+    if (!request) {
+      return res.json({ success: false, message: "Request not found" });
+    }
+
+    if (request.status !== 'pending') {
+      return res.json({ success: false, message: "Request has already been processed" });
+    }
+
+    // Update request status
+    request.status = 'rejected';
+    request.reviewedAt = new Date();
+    request.reviewedBy = userId;
+    request.reason = reason || 'No reason provided';
+    await request.save();
+
+    res.json({ success: true, message: "Educator request rejected successfully" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Set admin role (for initial setup - should be removed in production)
+export const setAdminRole = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.json({ success: false, message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: false, message: "User not found" });
+    }
+
+    // Add admin role if not already present
+    if (!user.roles.includes('admin')) {
+      user.roles.push('admin');
+      await user.save();
+    }
+
+    res.json({ success: true, message: "Admin role added successfully", user });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Check if email is allowed for admin access
+export const isEmailAllowedForAdmin = async (email) => {
+  const adminEmail = await AdminEmail.findOne({ 
+    email: email.toLowerCase().trim(), 
+    isActive: true 
+  });
+  return !!adminEmail;
+};
+
+// Get all allowed admin emails
+export const getAllowedAdminEmails = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const user = await User.findById(userId);
+    
+    if (!user || !user.roles.includes('admin')) {
+      return res.json({ success: false, message: "Unauthorized access" });
+    }
+
+    const adminEmails = await AdminEmail.find({ isActive: true })
+      .populate('addedBy', 'name email')
+      .sort({ addedAt: -1 });
+
+    res.json({ success: true, adminEmails });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Add email to allowed admin list
+export const addAllowedAdminEmail = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const { email } = req.body;
+    
+    const user = await User.findById(userId);
+    if (!user || !user.roles.includes('admin')) {
+      return res.json({ success: false, message: "Unauthorized access" });
+    }
+
+    if (!email) {
+      return res.json({ success: false, message: "Email is required" });
+    }
+
+    // Check if email already exists
+    const existingEmail = await AdminEmail.findOne({ 
+      email: email.toLowerCase().trim() 
+    });
+
+    if (existingEmail) {
+      if (existingEmail.isActive) {
+        return res.json({ success: false, message: "Email is already in the allowed list" });
+      } else {
+        // Reactivate the email
+        existingEmail.isActive = true;
+        existingEmail.addedBy = userId;
+        existingEmail.addedAt = new Date();
+        await existingEmail.save();
+        return res.json({ success: true, message: "Email reactivated successfully", adminEmail: existingEmail });
+      }
+    }
+
+    // Create new admin email entry
+    const adminEmail = await AdminEmail.create({
+      email: email.toLowerCase().trim(),
+      addedBy: userId
+    });
+
+    res.json({ success: true, message: "Email added to allowed list successfully", adminEmail });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Remove email from allowed admin list
+export const removeAllowedAdminEmail = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const { emailId } = req.body;
+    
+    const user = await User.findById(userId);
+    if (!user || !user.roles.includes('admin')) {
+      return res.json({ success: false, message: "Unauthorized access" });
+    }
+
+    if (!emailId) {
+      return res.json({ success: false, message: "Email ID is required" });
+    }
+
+    const adminEmail = await AdminEmail.findById(emailId);
+    if (!adminEmail) {
+      return res.json({ success: false, message: "Email not found" });
+    }
+
+    // Soft delete by setting isActive to false
+    adminEmail.isActive = false;
+    await adminEmail.save();
+
+    res.json({ success: true, message: "Email removed from allowed list successfully" });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }

@@ -4,9 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useClerk, UserButton, useUser } from "@clerk/clerk-react";
 import { AppContext } from "../../context/AppContext";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 const Navbar = () => {
-  const { navigate, isEducator, isStudent, updateUserRoles } = useContext(AppContext);
+  const { navigate, isEducator, isStudent, isAdmin, updateUserRoles, backendUrl, getToken } = useContext(AppContext);
   const [isSwitchingRole, setIsSwitchingRole] = useState(false);
 
   const isCourseListPage = location.pathname.includes("/course-list");
@@ -19,13 +20,36 @@ const Navbar = () => {
     
     setIsSwitchingRole(true);
     try {
-      // If user already has the role, remove it; otherwise add it
-      const action = (isEducator && role === "educator") || (isStudent && role === "student") ? "remove" : "add";
-      await updateUserRoles(action, role);      
+      if (role === "educator" && !isEducator) {
+        // Request educator role instead of directly adding
+        await requestEducatorRole();
+      } else {
+        // For student role or removing educator role, use existing logic
+        const action = (isEducator && role === "educator") || (isStudent && role === "student") ? "remove" : "add";
+        await updateUserRoles(action, role);
+      }
     } catch (error) {
       toast.error("Error toggling role:", error);
     } finally {
       setIsSwitchingRole(false);
+    }
+  };
+
+  const requestEducatorRole = async () => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.post(
+        backendUrl + "/api/user/request-educator",
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (data.success) {
+        toast.success("Educator request submitted! Admin will review your request.");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error("Failed to submit educator request");
     }
   };
 
@@ -74,6 +98,14 @@ const Navbar = () => {
               </div>
 
               {/* Navigation Links */}
+              {isAdmin && (
+                <Link 
+                  to="/admin" 
+                  className="hover:text-emerald-600 transition-colors font-medium"
+                >
+                  Admin Dashboard
+                </Link>
+              )}
               {isEducator && (
                 <Link 
                   to="/educator" 
@@ -133,6 +165,9 @@ const Navbar = () => {
               </div>
 
               {/* Navigation Links */}
+              {isAdmin && (
+                <Link to="/admin" className="text-xs">Admin</Link>
+              )}
               {isEducator && (
                 <Link to="/educator" className="text-xs">Dashboard</Link>
               )}

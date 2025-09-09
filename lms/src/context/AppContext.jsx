@@ -23,6 +23,7 @@ export const AppContextProvider = (props) => {
 
   const isEducator = useMemo(() => userRoles.includes("educator"), [userRoles]);
   const isStudent = useMemo(() => userRoles.includes("student"), [userRoles]);
+  const isAdmin = useMemo(() => userRoles.includes("admin"), [userRoles]);
 
   //Fetch all courses
   const fetchAllCourses = async () => {
@@ -117,6 +118,41 @@ export const AppContextProvider = (props) => {
     }
   }, [getToken, backendUrl, navigate]);
 
+  // Check for role updates periodically (for when admin approves educator request)
+  useEffect(() => {
+    if (user && isSignedIn) {
+      const checkRoleUpdates = async () => {
+        try {
+          const token = await getToken();
+          const { data } = await axios.get(backendUrl + "/api/user/data", {
+            headers: { Authorization: `Bearer ${token}` } },
+          );
+          if (data.success && data.user) {
+            // Check if user got new roles (like educator approval)
+            const newRoles = data.user.roles || [];
+            const currentRoles = userRoles;
+            
+            if (JSON.stringify(newRoles.sort()) !== JSON.stringify(currentRoles.sort())) {
+              setUserRoles(newRoles);
+              setUserData(data.user);
+              
+              // If user just got educator role, show notification
+              if (newRoles.includes('educator') && !currentRoles.includes('educator')) {
+                toast.success("🎉 Congratulations! Your educator request has been approved!");
+              }
+            }
+          }
+        } catch (error) {
+          // Silently fail for role checks
+        }
+      };
+
+      // Check for role updates every 10 seconds
+      const interval = setInterval(checkRoleUpdates, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [user, isSignedIn, getToken, backendUrl, userRoles]);
+
 
   const calculateRating = useCallback((course) => {
     if (!course?.courseRatings?.length) return 0;
@@ -181,6 +217,7 @@ export const AppContextProvider = (props) => {
     calculateRating,
     isEducator,
     isStudent,
+    isAdmin,
     userRoles,
     setUserRoles,
     calculateChapterTime,
@@ -196,10 +233,6 @@ export const AppContextProvider = (props) => {
     refreshCourses: fetchAllCourses, // Add refreshCourses as an alias for fetchAllCourses
     refreshUserData, // Add refreshUserData function
     updateUserRoles,
-    // testimonials,
-    // addTestimonial,
-    // editTestimonial,
-    // fetchTestimonials,
     createUserInDatabase,
     showRoleSelection,
     setShowRoleSelection,
@@ -210,6 +243,7 @@ export const AppContextProvider = (props) => {
     calculateRating,
     isEducator,
     isStudent,
+    isAdmin,
     userRoles,
     setUserRoles,
     calculateChapterTime,
@@ -224,10 +258,6 @@ export const AppContextProvider = (props) => {
     fetchAllCourses,
     refreshUserData,
     updateUserRoles,
-    // testimonials,
-    // addTestimonial,
-    // editTestimonial,
-    // fetchTestimonials,
     createUserInDatabase,
     showRoleSelection,
     setShowRoleSelection,

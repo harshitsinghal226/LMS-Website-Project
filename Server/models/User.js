@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true },
     imageUrl: { type: String, required: true },
-    roles: [{ type: String, enum: ['student', 'educator'], default: ['student'] }],
+    roles: [{ type: String, enum: ['student', 'educator', 'admin'], default: ['student'] }],
     enrolledCourses: [
       {
         type: mongoose.Schema.Types.ObjectId,

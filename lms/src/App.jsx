@@ -12,6 +12,7 @@ import Dashboard from "./pages/educator/Dashboard";
 import AddCourse from "./pages/educator/AddCourse";
 import MyCourses from "./pages/educator/MyCourses";
 import StudentsEnrolled from "./pages/educator/StudentsEnrolled";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import Navbar from "./components/student/Navbar";
 import "quill/dist/quill.snow.css";
 import { ToastContainer } from "react-toastify";
@@ -21,12 +22,13 @@ import { AppContext } from "./context/AppContext";
 
 function App() {
   const isEducator = useMatch("/educator/*");
+  const isAdmin = useMatch("/admin/*");
   const { showRoleSelection, setShowRoleSelection } = useContext(AppContext);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-emerald-50 to-white text-slate-800 antialiased">
       <ToastContainer />
-      {!isEducator && <Navbar />}
+      {!isEducator && !isAdmin && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/course-list" element={<CoursesList />} />
@@ -41,6 +43,7 @@ function App() {
           <Route path="my-courses" element={<MyCourses />} />
           <Route path="student-enrolled" element={<StudentsEnrolled />} />
         </Route>
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
 
       {/* Role Selection Modal */}

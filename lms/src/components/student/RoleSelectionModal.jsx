@@ -2,12 +2,13 @@ import { useState, useContext } from "react";
 import { AppContext } from "../../context/AppContext";
 import { useUser } from "@clerk/clerk-react";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 const RoleSelectionModal = ({ isOpen, onClose }) => {
   const [selectedRoles, setSelectedRoles] = useState(["student"]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useUser();
-  const { createUserInDatabase } = useContext(AppContext);
+  const { createUserInDatabase, backendUrl, getToken } = useContext(AppContext);
 
   const handleRoleToggle = (role) => {
     if (selectedRoles.includes(role)) {
@@ -25,10 +26,34 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
     
     setIsSubmitting(true);
     try {
-      // Create user in database with selected roles
-      const success = await createUserInDatabase(selectedRoles);
+      // Ensure user is created without directly assigning educator role
+      const rolesToCreate = selectedRoles.filter((r) => r !== "educator");
+      if (rolesToCreate.length === 0) {
+        rolesToCreate.push("student");
+      }
+
+      const success = await createUserInDatabase(rolesToCreate);
       if (success) {
-        toast.success(`Successfully signed up with roles: ${selectedRoles.join(', ')}!`);
+        // If user selected educator, send request to admin instead of granting role
+        if (selectedRoles.includes("educator")) {
+          try {
+            const token = await getToken();
+            const { data } = await axios.post(
+              backendUrl + "/api/user/request-educator",
+              {},
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (data.success) {
+              toast.success("Educator request submitted! Admin will review your request.");
+            } else {
+              toast.error(data.message || "Failed to submit educator request");
+            }
+          } catch (err) {
+            toast.error("Failed to submit educator request");
+          }
+        }
+
+        toast.success(`Successfully signed up with roles: ${rolesToCreate.join(', ')}!`);
         onClose();
       }
     } catch (error) {
